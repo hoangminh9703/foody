@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-12 - Phase 4 Order Management API
+
+- Implemented order creation, lookup, list filtering, and status update backend APIs.
+- Added order DTOs, request models, validators, CQRS handlers, and application service/repository layers.
+- Added `OrderController` endpoints:
+	- `POST /api/orders` (public)
+	- `GET /api/orders` (admin only)
+	- `GET /api/orders/{id}` (admin only)
+	- `PATCH /api/orders/{id}/status` (admin only)
+- Updated session middleware to allow anonymous order creation and CORS preflight requests.
+
 ## 2026-05-12 - Phase 3 Menu Management API
 
 - Implemented Menu Management backend API with CQRS-style handlers for create, read, update, delete, and list with pagination/filtering.

@@ -21,7 +21,10 @@ namespace Medicare.Api.Middleware
             if (!context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase) ||
                 context.Request.Path.StartsWithSegments(HealthPath, StringComparison.OrdinalIgnoreCase) ||
                 context.Request.Path.StartsWithSegments(LoginPath, StringComparison.OrdinalIgnoreCase) ||
-                context.Request.Path.StartsWithSegments(LogoutPath, StringComparison.OrdinalIgnoreCase))
+                context.Request.Path.StartsWithSegments(LogoutPath, StringComparison.OrdinalIgnoreCase) ||
+                context.Request.Method.Equals(HttpMethods.Options, StringComparison.OrdinalIgnoreCase) ||
+                (context.Request.Method.Equals(HttpMethods.Post, StringComparison.OrdinalIgnoreCase) &&
+                 context.Request.Path.Equals("/api/orders", StringComparison.OrdinalIgnoreCase)))
             {
                 await _next(context);
                 return;
