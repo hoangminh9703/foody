@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-05-12 - Phase 3 Menu Management API
+
+- Implemented Menu Management backend API with CQRS-style handlers for create, read, update, delete, and list with pagination/filtering.
+- Added menu DTOs, request models, and paged result contracts in the Application layer.
+- Added `IMenuRepository` and `MenuRepository` for EF Core menu persistence with eager-loading of menu items.
+- Added `IMenuService` and `MenuService` with business rules:
+	- no duplicate menu for same date + meal type
+	- no create/update/delete for past dates
+	- menu must include at least one item
+	- item price must be >= 0 and max 2 decimal places
+- Added `MenuController` endpoints:
+	- `POST /api/menus`
+	- `GET /api/menus`
+	- `GET /api/menus/{id}`
+	- `PUT /api/menus/{id}`
+	- `DELETE /api/menus/{id}`
+- Registered menu services/repositories/handlers in API dependency injection.
+
 ## 2026-05-12 - CD Temporarily Disabled
 
 - Updated [.github/workflows/cd.yml](../../.github/workflows/cd.yml) to run manual only (`workflow_dispatch`).

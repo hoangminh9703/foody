@@ -1,11 +1,15 @@
 using Medicare.Api.Middleware;
 using Medicare.Application.Commands;
 using Medicare.Application.Interfaces;
+using Medicare.Application.Queries;
 using Medicare.Application.Services;
 using Medicare.Infrastructure.Data;
 using Medicare.Infrastructure.Logging;
 using Medicare.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,8 +39,14 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-builder.Services.AddScoped<LoginCommandHandler>();
+builder.Services.AddScoped<IMenuService, MenuService>();
+
+// MediatR and FluentValidation
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Medicare.Application.Commands.CreateMenuCommand).Assembly));
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Medicare.Application.Validators.CreateMenuRequestValidator>();
 
 // Add services to the container
 builder.Services.AddControllers();

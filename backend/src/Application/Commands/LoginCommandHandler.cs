@@ -1,9 +1,10 @@
+using MediatR;
 using Medicare.Application.DTOs;
 using Medicare.Application.Interfaces;
 
 namespace Medicare.Application.Commands
 {
-    public class LoginCommandHandler
+    public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResult>
     {
         private readonly IAuthenticationService _authenticationService;
 
@@ -12,9 +13,9 @@ namespace Medicare.Application.Commands
             _authenticationService = authenticationService;
         }
 
-        public Task<AuthResult> HandleAsync(LoginCommand command, CancellationToken cancellationToken = default)
+        public Task<AuthResult> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            return _authenticationService.LoginAsync(command.Email, command.Password, cancellationToken);
+            return _authenticationService.LoginAsync(request.Email, request.Password, cancellationToken);
         }
     }
 }

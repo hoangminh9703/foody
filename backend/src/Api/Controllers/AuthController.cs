@@ -3,6 +3,7 @@ using Medicare.Application.Commands;
 using Medicare.Application.DTOs;
 using Medicare.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
 
 namespace Medicare.Api.Controllers
 {
@@ -14,11 +15,11 @@ namespace Medicare.Api.Controllers
         private const string SessionEmailKey = "Email";
         private const string SessionFullNameKey = "FullName";
         private const string SessionRoleKey = "Role";
-        private readonly LoginCommandHandler _loginCommandHandler;
+        private readonly IMediator _mediator;
 
-        public AuthController(LoginCommandHandler loginCommandHandler)
+        public AuthController(IMediator mediator)
         {
-            _loginCommandHandler = loginCommandHandler;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -27,7 +28,7 @@ namespace Medicare.Api.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResult>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
-            var result = await _loginCommandHandler.HandleAsync(new LoginCommand(request.Email, request.Password), cancellationToken);
+            var result = await _mediator.Send(new LoginCommand(request.Email, request.Password), cancellationToken);
 
             if (!result.Success)
             {

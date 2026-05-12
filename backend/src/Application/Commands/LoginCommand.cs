@@ -1,6 +1,9 @@
+using MediatR;
+using Medicare.Application.DTOs;
+
 namespace Medicare.Application.Commands
 {
-    public class LoginCommand
+    public class LoginCommand : IRequest<AuthResult>
     {
         public LoginCommand(string email, string password)
         {
