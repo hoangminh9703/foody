@@ -1,0 +1,138 @@
+name: CD
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-staging:
+    name: Deploy Staging
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: staging
+
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_PATH: ${{ secrets.SSH_PATH }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      FRONTEND_PORT: ${{ secrets.FRONTEND_PORT }}
+      ASPNETCORE_ENVIRONMENT: Staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Trust deployment host
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -p "${SSH_PORT:-22}" -H "${SSH_HOST}" >> ~/.ssh/known_hosts
+
+      - name: Create remote directory
+        run: ssh -p "${SSH_PORT:-22}" "${SSH_USER}@${SSH_HOST}" "mkdir -p '${SSH_PATH}'"
+
+      - name: Sync application files
+        run: |
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'backend/bin' \
+            --exclude 'backend/obj' \
+            --exclude 'web/node_modules' \
+            --exclude 'web/dist' \
+            ./ "${SSH_USER}@${SSH_HOST}:${SSH_PATH}/"
+
+      - name: Render environment file
+        run: |
+          cat > .env.staging <<EOF
+          POSTGRES_DB=${POSTGRES_DB}
+          POSTGRES_USER=${POSTGRES_USER}
+          POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+          ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+          FRONTEND_PORT=${FRONTEND_PORT}
+          EOF
+          scp -P "${SSH_PORT:-22}" .env.staging "${SSH_USER}@${SSH_HOST}:${SSH_PATH}/.env.staging"
+          rm -f .env.staging
+
+      - name: Deploy
+        run: |
+          ssh -p "${SSH_PORT:-22}" "${SSH_USER}@${SSH_HOST}" \
+            "cd '${SSH_PATH}' && docker compose --env-file .env.staging up -d --build --remove-orphans"
+
+  deploy-production:
+    name: Deploy Production
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_PATH: ${{ secrets.SSH_PATH }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      FRONTEND_PORT: ${{ secrets.FRONTEND_PORT }}
+      ASPNETCORE_ENVIRONMENT: Production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Trust deployment host
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -p "${SSH_PORT:-22}" -H "${SSH_HOST}" >> ~/.ssh/known_hosts
+
+      - name: Create remote directory
+        run: ssh -p "${SSH_PORT:-22}" "${SSH_USER}@${SSH_HOST}" "mkdir -p '${SSH_PATH}'"
+
+      - name: Sync application files
+        run: |
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'backend/bin' \
+            --exclude 'backend/obj' \
+            --exclude 'web/node_modules' \
+            --exclude 'web/dist' \
+            ./ "${SSH_USER}@${SSH_HOST}:${SSH_PATH}/"
+
+      - name: Render environment file
+        run: |
+          cat > .env.production <<EOF
+          POSTGRES_DB=${POSTGRES_DB}
+          POSTGRES_USER=${POSTGRES_USER}
+          POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+          ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+          FRONTEND_PORT=${FRONTEND_PORT}
+          EOF
+          scp -P "${SSH_PORT:-22}" .env.production "${SSH_USER}@${SSH_HOST}:${SSH_PATH}/.env.production"
+          rm -f .env.production
+
+      - name: Deploy
+        run: |
+          ssh -p "${SSH_PORT:-22}" "${SSH_USER}@${SSH_HOST}" \
+            "cd '${SSH_PATH}' && docker compose --env-file .env.production up -d --build --remove-orphans"

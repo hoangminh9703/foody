@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-05-12 - CD Temporarily Disabled
+
+- Updated [.github/workflows/cd.yml](../../.github/workflows/cd.yml) to run manual only (`workflow_dispatch`).
+- CI in [.github/workflows/ci.yml](../../.github/workflows/ci.yml) remains active for push and pull request validation.
+
+## 2026-05-12 - CI/CD Pipeline
+
+- Added GitHub Actions CI for backend restore/build/test and frontend lint/build.
+- Added GitHub Actions CD for SSH-based VPS deployments to staging and production.
+- Added a root docker-compose.yml for backend, PostgreSQL, and frontend services on a shared internal network.
+- Switched the frontend Dockerfile to npm ci after adding the lockfile for deterministic builds.
+
+## 2026-05-12 - Docker Setup
+
+- Added `backend/Dockerfile` for multi-stage .NET 8 API builds.
+- Added `web/Dockerfile` and `web/nginx.conf` for a production Vite build served by Nginx.
+- Added `.dockerignore` files for both app roots to keep build contexts small.
+- Updated `backend/src/Api/Program.cs` so HTTPS redirection stays enabled in development without breaking container HTTP startup.
+
 ## 2026-05-11 - Phase 1 Complete ✅
 
 ### Planning

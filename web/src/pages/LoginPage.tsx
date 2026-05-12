@@ -50,7 +50,7 @@ export default function LoginPage() {
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="admin@medicare.local"
+            placeholder=""
           />
           <Input
             label="Password"
