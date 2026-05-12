@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noEmit": true,
+    "types": ["node", "@playwright/test"],
+    "skipLibCheck": true
+  },
+  "include": ["tests/**/*.ts", "playwright.config.ts"]
+}

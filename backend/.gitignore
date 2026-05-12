@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C# / .NET
+bin/
+obj/
+*.csproj.user
+*.sln.docstates
+.vs/
+.vscode/
+
+# User secrets
+appsettings.*.json
+secrets.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Database files
+*.mdf
+*.ldf
+*.ndf
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+
+# Dependencies
+node_modules/
+packages/
